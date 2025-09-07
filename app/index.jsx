@@ -1,12 +1,14 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { useEffect } from "react";
+import { useRouter } from "expo-router";
 
-const index = () => {
-  return (
-    <View>
-      <Text>index</Text>
-    </View>
-  )
+export default function Index() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect to splash screen immediately
+    router.replace("/splash");
+  }, [router]);
+
+  // Return null since we're redirecting immediately
+  return null;
 }
-
-export default index
