@@ -1,83 +1,93 @@
 import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { Animated } from "react-native"; // For icon scale animation
-import "../../global.css";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { View } from "react-native";
 
-function TabBarIcon({ name, color, size, focused }) {
-  return (
-    <Animated.View
-      style={{
-        transform: [{ scale: focused ? 1.2 : 1 }],
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Ionicons name={name} size={size} color={color} />
-    </Animated.View>
-  );
-}
-
-export default function TabsLayout() {
+export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#67C090", 
-        tabBarInactiveTintColor: "#9CA3AF", // Gray-400
-        tabBarShowLabel: true,
+        tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
           bottom: 20,
           left: 20,
           right: 20,
-          backgroundColor: "#fff",
-          borderRadius: 20,
+          backgroundColor: "white",
+          borderRadius: 30,
           height: 70,
-          paddingBottom: 10,
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.15,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.1,
           shadowRadius: 6,
-          elevation: 6, // Android shadow
-        },
-        tabBarItemStyle: {
-          paddingVertical: 5,
+          elevation: 5,
         },
       }}
     >
+      {/* Home */}
       <Tabs.Screen
         name="home"
         options={{
-          title: "Home",
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabBarIcon name="home-outline" color={color} size={size} focused={focused} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              size={26}
+              color={focused ? "#2f855a" : "gray"}
+            />
           ),
         }}
       />
+
+      {/* Library */}
       <Tabs.Screen
         name="library"
         options={{
-          title: "Library",
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabBarIcon name="book-outline" color={color} size={size} focused={focused} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "book" : "book-outline"}
+              size={26}
+              color={focused ? "#2f855a" : "gray"}
+            />
           ),
         }}
       />
+
+      {/* Floating Plant Tab (center) */}
+      <Tabs.Screen
+        name="plant"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View className="bg-green-400 w-16 h-16 rounded-full items-center justify-center shadow-lg -mt-8">
+              <MaterialCommunityIcons name="leaf" size={28} color="white" />
+            </View>
+          ),
+        }}
+      />
+
+      {/* History */}
       <Tabs.Screen
         name="history"
         options={{
-          title: "History",
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabBarIcon name="time-outline" color={color} size={size} focused={focused} />
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name={focused ? "time" : "time-outline"}
+              size={26}
+              color={focused ? "#2f855a" : "gray"}
+            />
           ),
         }}
       />
+
+      {/* Profile */}
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabBarIcon name="person-outline" color={color} size={size} focused={focused} />
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              size={26}
+              color={focused ? "#2f855a" : "gray"}
+            />
           ),
         }}
       />

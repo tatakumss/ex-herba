@@ -4,7 +4,7 @@
     "slug": "client",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/herbalogo.png",
+    "icon": "./assets/images/logoherba.png",
     "scheme": "client",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,11 +13,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/herbalogo.png",
+        "foregroundImage": "./assets/images/logoherba.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.herba.expo"
+      "package": "com.herba.expo",
+      "permissions": ["CAMERA"]
     },
     "web": {
       "bundler": "metro",
@@ -29,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/herbalogo.png",
+          "image": "./assets/images/logoherba.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
