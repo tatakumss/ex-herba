@@ -1,9 +1,14 @@
 {
   "expo": {
-    "name": "client",
-    "slug": "client",
+    "name": "Herba",
+    "slug": "herba-client",
     "version": "1.0.0",
+    "platforms": ["ios", "android", "web"],
     "newArchEnabled": true,
+    "jsEngine": "hermes",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "web": {
       "bundler": "metro",
       "output": "static"
@@ -12,10 +17,18 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {},
+      "router": {
+        "origin": false
+      },
       "eas": {
         "projectId": "5560d987-00b4-4395-80ca-f7d86b78ca91"
       }
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }
