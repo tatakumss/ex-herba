@@ -1,14 +1,91 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import PlantIdentificationService from '../../services/PlantIdentificationService';
 
 export default function PlantScreen() {
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isIdentifying, setIsIdentifying] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(true);
+
+  useEffect(() => {
+    // Initialize TensorFlow models on component mount
+    const initializeModels = async () => {
+      try {
+        await PlantIdentificationService.initialize();
+        setIsModelLoading(false);
+      } catch (error) {
+        console.error('Failed to initialize models:', error);
+        setIsModelLoading(false);
+        Alert.alert('Model Loading Error', 'Failed to load plant identification models. Some features may not work properly.');
+      }
+    };
+
+    initializeModels();
+  }, []);
+
+  const identifyPlantFromImage = async (imageUri) => {
+    setIsIdentifying(true);
+
+    try {
+      // Use real TensorFlow Lite models for identification
+      const identificationResult = await PlantIdentificationService.identifyWithAllModels(imageUri);
+
+      if (identificationResult.success) {
+        const { plant, leaf, mendeley } = identificationResult.results;
+        
+        // Get the best result from all models
+        let bestResult = null;
+        let modelUsed = '';
+        
+        if (plant.success && plant.topResult.confidence > 0.5) {
+          bestResult = plant.topResult;
+          modelUsed = 'Plant Species Model';
+        } else if (leaf.success && leaf.topResult.confidence > 0.5) {
+          bestResult = leaf.topResult;
+          modelUsed = 'Leaf Classification Model';
+        } else if (mendeley.success && mendeley.topResult.confidence > 0.5) {
+          bestResult = mendeley.topResult;
+          modelUsed = 'Academic Plant Model';
+        }
+
+        if (bestResult) {
+          Alert.alert(
+            'Herbal Plant Identified!',
+            `${bestResult.label}\n\nConfidence: ${bestResult.percentage}%\nModel: ${modelUsed}\n\nTop 3 Results:\n${plant.success ? plant.results.slice(0, 3).map(r => `• ${r.label} (${r.percentage}%)`).join('\n') : 'No results'}`,
+            [
+              { text: 'View Details', onPress: () => showDetailedResults(identificationResult) },
+              { text: 'Save to Collection' },
+              { text: 'OK' }
+            ]
+          );
+        } else {
+          Alert.alert(
+            'Identification Uncertain',
+            'The models could not confidently identify this herbal plant. Please try:\n• Taking a clearer photo\n• Better lighting\n• Different angle\n• Focus on leaves or distinctive features',
+            [{ text: 'Try Again' }, { text: 'OK' }]
+          );
+        }
+      } else {
+        Alert.alert('Identification Failed', 'Unable to process the image. Please try again.');
+      }
+    } catch (error) {
+      console.error('Identification error:', error);
+      Alert.alert('Error', 'An error occurred during plant identification. Please try again.');
+    } finally {
+      setIsIdentifying(false);
+    }
+  };
 
   const handleCameraPress = async () => {
+    if (isModelLoading) {
+      Alert.alert('Please Wait', 'Plant identification models are still loading...');
+      return;
+    }
+
     // Request camera permissions
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
@@ -26,13 +103,54 @@ export default function PlantScreen() {
 
     if (!result.canceled) {
       setSelectedImage(result.assets[0]);
-      // Simulate plant identification
-      Alert.alert(
-        'Plant Identified!', 
-        'This appears to be Turmeric (Curcuma longa)\n\nBenefits: Anti-inflammatory, Antioxidant\n\nConfidence: 94%',
-        [{ text: 'Save to Collection' }, { text: 'OK' }]
-      );
+      await identifyPlantFromImage(result.assets[0].uri);
     }
+  };
+
+  const handleUploadPress = async () => {
+    if (isModelLoading) {
+      Alert.alert('Please Wait', 'Plant identification models are still loading...');
+      return;
+    }
+
+    // Request media library permissions
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Gallery access is required to select photos');
+      return;
+    }
+
+    // Launch image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0]);
+      await identifyPlantFromImage(result.assets[0].uri);
+    }
+  };
+
+  const showDetailedResults = (results) => {
+    const { plant, leaf, mendeley } = results.results;
+    let detailText = 'Detailed Results:\n\n';
+    
+    if (plant.success) {
+      detailText += `🌿 Plant Species Model:\n${plant.results.slice(0, 3).map(r => `  • ${r.label}: ${r.percentage}%`).join('\n')}\n\n`;
+    }
+    
+    if (leaf.success) {
+      detailText += `🍃 Leaf Classification Model:\n${leaf.results.slice(0, 3).map(r => `  • ${r.label}: ${r.percentage}%`).join('\n')}\n\n`;
+    }
+    
+    if (mendeley.success) {
+      detailText += `🔬 Academic Model:\n${mendeley.results.slice(0, 3).map(r => `  • ${r.label}: ${r.percentage}%`).join('\n')}`;
+    }
+
+    Alert.alert('Detailed Results', detailText, [{ text: 'OK' }]);
   };
 
   const handleLibraryPress = () => {
@@ -55,27 +173,82 @@ export default function PlantScreen() {
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Main Action Cards */}
-        <View className="space-y-4 mb-8">
-          {/* Camera Card */}
+        {/* Capture Herbal Plants Section */}
+        <View className="mb-8">
+          <View className="flex-row items-center mb-4">
+            <MaterialCommunityIcons name="camera-outline" size={24} color="#2f855a" />
+            <Text className="text-xl font-bold text-green-800 ml-2">Capture Herbal Plants</Text>
+          </View>
           <TouchableOpacity
             onPress={handleCameraPress}
             className="bg-white rounded-2xl p-6 shadow-lg flex-row items-center"
             activeOpacity={0.7}
+            disabled={isIdentifying || isModelLoading}
           >
             <View className="w-16 h-16 rounded-full bg-green-100 items-center justify-center">
-              <Ionicons name="camera" size={32} color="#2f855a" />
+              {isIdentifying ? (
+                <ActivityIndicator size="large" color="#2f855a" />
+              ) : (
+                <Ionicons name="camera" size={32} color="#2f855a" />
+              )}
             </View>
             <View className="ml-4 flex-1">
-              <Text className="text-lg font-bold text-green-800">Take Photo</Text>
+              <Text className="text-lg font-bold text-green-800">
+                {isModelLoading ? 'Loading Models...' : isIdentifying ? 'Identifying...' : 'Take Photo'}
+              </Text>
               <Text className="text-gray-500 mt-1">
-                Capture a plant to identify it instantly
+                {isModelLoading ? 'AI models are loading, please wait' : 
+                 isIdentifying ? 'Processing your herbal plant image' : 
+                 'Use camera to capture herbal plants in real-time'}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#9ae6b4" />
+            {!isIdentifying && !isModelLoading && (
+              <Ionicons name="chevron-forward" size={24} color="#9ae6b4" />
+            )}
           </TouchableOpacity>
+        </View>
 
-          {/* Library Card */}
+        {/* Upload Herbal Plants Section */}
+        <View className="mb-8">
+          <View className="flex-row items-center mb-4">
+            <MaterialCommunityIcons name="image-outline" size={24} color="#7c3aed" />
+            <Text className="text-xl font-bold text-green-800 ml-2">Upload Herbal Plants</Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleUploadPress}
+            className="bg-white rounded-2xl p-6 shadow-lg flex-row items-center"
+            activeOpacity={0.7}
+            disabled={isIdentifying || isModelLoading}
+          >
+            <View className="w-16 h-16 rounded-full bg-purple-100 items-center justify-center">
+              {isIdentifying ? (
+                <ActivityIndicator size="large" color="#7c3aed" />
+              ) : (
+                <Ionicons name="image" size={32} color="#7c3aed" />
+              )}
+            </View>
+            <View className="ml-4 flex-1">
+              <Text className="text-lg font-bold text-green-800">
+                {isModelLoading ? 'Loading Models...' : isIdentifying ? 'Identifying...' : 'Select from Gallery'}
+              </Text>
+              <Text className="text-gray-500 mt-1">
+                {isModelLoading ? 'AI models are loading, please wait' : 
+                 isIdentifying ? 'Processing your herbal plant image' : 
+                 'Choose existing herbal plant photos from gallery'}
+              </Text>
+            </View>
+            {!isIdentifying && !isModelLoading && (
+              <Ionicons name="chevron-forward" size={24} color="#9ae6b4" />
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Browse Library Section */}
+        <View className="mb-8">
+          <View className="flex-row items-center mb-4">
+            <MaterialCommunityIcons name="book-open-outline" size={24} color="#2563eb" />
+            <Text className="text-xl font-bold text-green-800 ml-2">Browse Library</Text>
+          </View>
           <TouchableOpacity
             onPress={handleLibraryPress}
             className="bg-white rounded-2xl p-6 shadow-lg flex-row items-center"
@@ -85,9 +258,9 @@ export default function PlantScreen() {
               <Ionicons name="library" size={32} color="#2563eb" />
             </View>
             <View className="ml-4 flex-1">
-              <Text className="text-lg font-bold text-green-800">Browse Library</Text>
+              <Text className="text-lg font-bold text-green-800">Explore Plant Database</Text>
               <Text className="text-gray-500 mt-1">
-                Explore our comprehensive plant database
+                Browse comprehensive herbal plant collection
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={24} color="#9ae6b4" />

@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { View } from "react-native";
+import { View, Platform } from "react-native";
 
 export default function TabLayout() {
   return (
@@ -10,30 +10,36 @@ export default function TabLayout() {
         tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
-          bottom: 20,
-          left: 20,
-          right: 20,
+          bottom: Platform.OS === 'ios' ? 25 : 15,
+          left: 50,
+          right: 50,
           backgroundColor: "white",
-          borderRadius: 30,
-          height: 70,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.1,
-          shadowRadius: 6,
-          elevation: 5,
+          borderRadius: 25,
+          height: 60,
+          paddingHorizontal: 20,
+          elevation: 0,
+          borderTopWidth: 0,
+          borderWidth: 1,
+          borderColor: "#e5e7eb",
         },
+        tabBarActiveTintColor: "#22c55e",
+        tabBarInactiveTintColor: "#6b7280",
       }}
     >
       {/* Home */}
       <Tabs.Screen
         name="home"
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "home" : "home-outline"}
-              size={26}
-              color={focused ? "#2f855a" : "gray"}
-            />
+          tabBarIcon: ({ focused }) => (
+            <View className="items-center justify-center">
+              <View className={`${focused ? 'bg-green-500' : 'bg-transparent'} w-10 h-10 rounded-2xl items-center justify-center`}>
+                <Ionicons
+                  name={focused ? "home" : "home-outline"}
+                  size={24}
+                  color={focused ? "white" : "#6b7280"}
+                />
+              </View>
+            </View>
           ),
         }}
       />
@@ -42,12 +48,16 @@ export default function TabLayout() {
       <Tabs.Screen
         name="library"
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "book" : "book-outline"}
-              size={26}
-              color={focused ? "#2f855a" : "gray"}
-            />
+          tabBarIcon: ({ focused }) => (
+            <View className="items-center justify-center">
+              <View className={`${focused ? 'bg-green-500' : 'bg-transparent'} w-10 h-10 rounded-2xl items-center justify-center`}>
+                <Ionicons
+                  name={focused ? "library" : "library-outline"}
+                  size={24}
+                  color={focused ? "white" : "#6b7280"}
+                />
+              </View>
+            </View>
           ),
         }}
       />
@@ -57,8 +67,10 @@ export default function TabLayout() {
         name="plant"
         options={{
           tabBarIcon: ({ focused }) => (
-            <View className="bg-green-400 w-16 h-16 rounded-full items-center justify-center shadow-lg -mt-8">
-              <MaterialCommunityIcons name="leaf" size={28} color="white" />
+            <View className="items-center justify-center -mt-4">
+              <View className={`${focused ? 'bg-green-600' : 'bg-green-500'} w-12 h-12 rounded-2xl items-center justify-center`}>
+                <MaterialCommunityIcons name="leaf" size={28} color="white" />
+              </View>
             </View>
           ),
         }}
@@ -69,11 +81,15 @@ export default function TabLayout() {
         name="history"
         options={{
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name={focused ? "time" : "time-outline"}
-              size={26}
-              color={focused ? "#2f855a" : "gray"}
-            />
+            <View className="items-center justify-center">
+              <View className={`${focused ? 'bg-green-500' : 'bg-transparent'} w-10 h-10 rounded-2xl items-center justify-center`}>
+                <Ionicons
+                  name={focused ? "time" : "time-outline"}
+                  size={24}
+                  color={focused ? "white" : "#6b7280"}
+                />
+              </View>
+            </View>
           ),
         }}
       />
@@ -83,11 +99,15 @@ export default function TabLayout() {
         name="profile"
         options={{
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name={focused ? "person" : "person-outline"}
-              size={26}
-              color={focused ? "#2f855a" : "gray"}
-            />
+            <View className="items-center justify-center">
+              <View className={`${focused ? 'bg-green-500' : 'bg-transparent'} w-10 h-10 rounded-2xl items-center justify-center`}>
+                <Ionicons
+                  name={focused ? "person" : "person-outline"}
+                  size={24}
+                  color={focused ? "white" : "#6b7280"}
+                />
+              </View>
+            </View>
           ),
         }}
       />

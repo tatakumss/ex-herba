@@ -38,6 +38,10 @@
         }
       ]
     ],
+    "assetBundlePatterns": [
+      "assets/models/*.tflite",
+      "assets/labels/*.json"
+    ],
     "experiments": {
       "typedRoutes": true
     },
