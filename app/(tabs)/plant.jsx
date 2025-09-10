@@ -1,8 +1,8 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
-import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
-import { useState, useEffect } from "react";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import PlantIdentificationService from '../../services/PlantIdentificationService';
 
 export default function PlantScreen() {

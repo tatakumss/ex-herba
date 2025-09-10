@@ -18,7 +18,9 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.herba.expo",
-      "permissions": ["CAMERA"]
+      "permissions": [
+        "CAMERA"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -50,6 +52,7 @@
       "eas": {
         "projectId": "5560d987-00b4-4395-80ca-f7d86b78ca91"
       }
-    }
+    },
+    "owner": "franzsyz"
   }
 }
